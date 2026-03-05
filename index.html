@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neural Pathway Atlas — Interactive Brain Network Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="bgCanvas" class="bg-canvas" aria-hidden="true"></canvas>
+
+  <header class="hero">
+    <div class="hero__grid">
+      <div class="hero__copy">
+        <div class="hero__badge">Interactive Neural Atlas</div>
+        <h1 class="hero__title">Neural Pathway <em>Atlas</em></h1>
+        <p class="hero__subtitle">
+          Explore how 86 billion neurons wire the human brain — click regions, trace signal routes, simulate synaptic firing, and compare biological networks to artificial ones.
+        </p>
+        <div class="hero__actions">
+          <button class="btn btn--primary" id="startTour">Launch Pathway Tour</button>
+          <button class="btn btn--ghost" id="fireSignal">Fire Test Signal</button>
+          <button class="btn btn--ghost" id="resetAtlas">Reset Atlas</button>
+        </div>
+      </div>
+      <div class="hero__metrics" id="heroMetrics"></div>
+    </div>
+  </header>
+
+  <nav class="region-nav" aria-label="Brain region navigation">
+    <div class="region-nav__inner" id="regionNav"></div>
+  </nav>
+
+  <main class="atlas">
+    <section class="atlas__stage">
+      <div class="viz-panel">
+        <div class="viz-panel__head">
+          <div>
+            <h2 class="viz-panel__title">Brain Region Map</h2>
+            <p class="viz-panel__sub">Select a lobe to inspect connectivity and function</p>
+          </div>
+          <div class="viz-panel__toggles">
+            <label class="toggle"><input type="checkbox" id="togglePathways" checked /><span>Pathways</span></label>
+            <label class="toggle"><input type="checkbox" id="toggleActivity" checked /><span>Activity pulse</span></label>
+            <label class="toggle"><input type="checkbox" id="toggleLabels" checked /><span>Labels</span></label>
+          </div>
+        </div>
+
+        <div class="brain-stage">
+          <svg class="brain-svg" viewBox="0 0 900 700" role="img" aria-labelledby="brainTitle">
+            <title id="brainTitle">Interactive lateral view of the human brain with six major regions</title>
+            <defs>
+              <radialGradient id="brainBg" cx="50%" cy="40%" r="70%">
+                <stop offset="0%" stop-color="#141c33" />
+                <stop offset="100%" stop-color="#070a14" />
+              </radialGradient>
+              <filter id="regionGlow">
+                <feGaussianBlur stdDeviation="5" result="b" />
+                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+            <rect width="900" height="700" rx="18" fill="url(#brainBg)" />
+            <g id="brainOutline" opacity="0.35">
+              <path d="M 120 360 C 120 180 280 80 450 95 C 620 80 780 200 780 380 C 780 520 680 620 520 640 C 380 655 260 610 180 520 C 130 460 120 400 120 360 Z" fill="#2a3555" stroke="#4a5880" stroke-width="2" />
+            </g>
+            <g id="brainRegions"></g>
+            <g id="pathwayLines"></g>
+            <g id="signalPulse"></g>
+            <g id="regionLabels"></g>
+          </svg>
+        </div>
+
+        <div class="signal-bar">
+          <div class="signal-bar__head">
+            <span class="signal-bar__label">Signal Route Simulator</span>
+            <span class="signal-bar__readout" id="signalReadout">Ready — select origin & destination</span>
+          </div>
+          <div class="signal-bar__controls">
+            <select id="signalFrom" class="select" aria-label="Signal origin"></select>
+            <span class="signal-bar__arrow">→</span>
+            <select id="signalTo" class="select" aria-label="Signal destination"></select>
+            <button class="btn btn--primary btn--sm" id="runSignal">Propagate</button>
+          </div>
+          <div class="signal-bar__track" id="signalTrack"></div>
+        </div>
+      </div>
+
+      <aside class="detail-panel">
+        <div class="detail-panel__tabs" role="tablist">
+          <button class="detail-panel__tab detail-panel__tab--active" data-tab="overview">Overview</button>
+          <button class="detail-panel__tab" data-tab="pathways">Pathways</button>
+          <button class="detail-panel__tab" data-tab="neuro">Neurotransmitters</button>
+          <button class="detail-panel__tab" data-tab="signal">Signal Lab</button>
+          <button class="detail-panel__tab" data-tab="facts">Facts</button>
+        </div>
+
+        <div class="detail-panel__pane" id="paneOverview">
+          <div class="detail-panel__badge" id="regionBadge">Select a region</div>
+          <h2 class="detail-panel__heading" id="regionTitle">The Living Network</h2>
+          <p class="detail-panel__role" id="regionRole"></p>
+          <p class="detail-panel__text" id="regionDescription">
+            The brain is the most complex network known — trillions of synapses route electrochemical signals that produce thought, memory, emotion, and movement.
+          </p>
+          <div class="stat-grid" id="regionStats"></div>
+          <div id="connectionBlock" hidden>
+            <h3 class="section-label">Connected Regions</h3>
+            <div class="chip-row" id="connectionChips"></div>
+          </div>
+          <div id="functionsBlock" hidden>
+            <h3 class="section-label">Primary Functions</h3>
+            <ul class="function-list" id="functionList"></ul>
+          </div>
+        </div>
+
+        <div class="detail-panel__pane detail-panel__pane--hidden" id="panePathways">
+          <h2 class="detail-panel__heading">Major Pathways</h2>
+          <p class="detail-panel__text">White-matter tracts bundle axons into highways linking distant regions. Click a pathway to highlight it on the map.</p>
+          <div class="pathway-list" id="pathwayList"></div>
+        </div>
+
+        <div class="detail-panel__pane detail-panel__pane--hidden" id="paneNeuro">
+          <h2 class="detail-panel__heading">Chemical Messengers</h2>
+          <p class="detail-panel__text">Neurotransmitters modulate how strongly neurons fire across synapses — shaping mood, focus, learning, and sleep.</p>
+          <div class="neuro-grid" id="neuroGrid"></div>
+        </div>
+
+        <div class="detail-panel__pane detail-panel__pane--hidden" id="paneSignal">
+          <h2 class="detail-panel__heading">Action Potential Lab</h2>
+          <p class="detail-panel__text">Watch a simplified action potential — the all-or-nothing electrical spike that carries information down an axon.</p>
+          <canvas id="actionPotentialCanvas" width="620" height="300" aria-label="Action potential waveform animation"></canvas>
+          <div class="lab-controls">
+            <button class="btn btn--ghost btn--sm" id="replayAP">Replay spike</button>
+            <label class="toggle"><input type="checkbox" id="autoAP" checked /><span>Auto repeat</span></label>
+          </div>
+          <div class="lab-readout" id="apReadout">Resting potential: −70 mV</div>
+        </div>
+
+        <div class="detail-panel__pane detail-panel__pane--hidden" id="paneFacts">
+          <h2 class="detail-panel__heading">Neuroscience Highlights</h2>
+          <ul class="fact-grid" id="factList"></ul>
+        </div>
+      </aside>
+    </section>
+
+    <section class="atlas__network">
+      <article class="network-card network-card--main">
+        <div class="network-card__head">
+          <h3 class="network-card__title">Live Connectivity Graph</h3>
+          <p class="network-card__sub">Force-directed view of inter-region connections — drag nodes to explore</p>
+        </div>
+        <canvas id="networkCanvas" height="480" aria-label="Interactive neural network graph"></canvas>
+      </article>
+
+      <article class="network-card">
+        <div class="network-card__head">
+          <h3 class="network-card__title">Regional Activity</h3>
+          <p class="network-card__sub">Simulated firing rates during a cognitive task</p>
+        </div>
+        <canvas id="activityChart" height="320"></canvas>
+      </article>
+
+      <article class="network-card">
+        <div class="network-card__head">
+          <h3 class="network-card__title">Synaptic Throughput</h3>
+          <p class="network-card__sub">Estimated synapses per region (billions)</p>
+        </div>
+        <div class="synapse-chart" id="synapseChart"></div>
+      </article>
+    </section>
+
+    <section class="atlas__compare">
+      <div class="compare-header">
+        <h3 class="compare-header__title">Biological Brain vs. Artificial Neural Network</h3>
+        <p class="compare-header__sub">Side-by-side anatomy of nature's network and today's AI architectures</p>
+      </div>
+      <div class="compare-grid" id="compareGrid"></div>
+    </section>
+
+    <section class="atlas__timeline">
+      <h3 class="timeline-header">Milestones in Neuroscience</h3>
+      <div class="timeline-scroll" id="timeline"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Simplified educational model · Not medical advice · Interactive infographic demo</p>
+  </footer>
+
+  <div class="tour-toast" id="tourToast" hidden role="status"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
