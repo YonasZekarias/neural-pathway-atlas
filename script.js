@@ -4,7 +4,9 @@ const REGIONS = {
   frontal: {
     name: "Frontal Lobe",
     role: "Executive control & planning",
-    color: "#0d6e6e",
+    color: "#7c5cff",
+    colorLight: "#b39dff",
+    icon: "◈",
     center: { x: 400, y: 148 },
     stats: [
       { label: "Volume share", value: "~41%" },
@@ -18,7 +20,9 @@ const REGIONS = {
   parietal: {
     name: "Parietal Lobe",
     role: "Spatial processing",
-    color: "#3a8fb7",
+    color: "#22d3ee",
+    colorLight: "#67e8f9",
+    icon: "◆",
     center: { x: 590, y: 268 },
     stats: [
       { label: "Volume share", value: "~19%" },
@@ -32,7 +36,9 @@ const REGIONS = {
   occipital: {
     name: "Occipital Lobe",
     role: "Visual processing",
-    color: "#c49a3c",
+    color: "#fbbf24",
+    colorLight: "#fde68a",
+    icon: "◎",
     center: { x: 210, y: 268 },
     stats: [
       { label: "Volume share", value: "~12%" },
@@ -46,7 +52,9 @@ const REGIONS = {
   temporal: {
     name: "Temporal Lobe",
     role: "Memory & language",
-    color: "#e85d4c",
+    color: "#f472b6",
+    colorLight: "#f9a8d4",
+    icon: "♫",
     center: { x: 210, y: 448 },
     stats: [
       { label: "Volume share", value: "~22%" },
@@ -60,7 +68,9 @@ const REGIONS = {
   cerebellum: {
     name: "Cerebellum",
     role: "Motor coordination",
-    color: "#5a9a6e",
+    color: "#34d399",
+    colorLight: "#6ee7b7",
+    icon: "↻",
     center: { x: 400, y: 448 },
     stats: [
       { label: "Neurons", value: "~69 billion" },
@@ -74,7 +84,9 @@ const REGIONS = {
   brainstem: {
     name: "Brainstem",
     role: "Autonomic relay",
-    color: "#8b5a7a",
+    color: "#fb923c",
+    colorLight: "#fdba74",
+    icon: "♥",
     center: { x: 590, y: 448 },
     stats: [
       { label: "Structures", value: "Midbrain, pons, medulla" },
@@ -88,21 +100,21 @@ const REGIONS = {
 };
 
 const PATHWAYS = [
-  { id: "arcuate", name: "Arcuate Fasciculus", from: "frontal", to: "temporal", color: "#0d6e6e", desc: "Links Broca's and Wernicke's areas for speech." },
-  { id: "corpus", name: "Corpus Callosum", from: "frontal", to: "parietal", color: "#3a8fb7", desc: "Bridge between left and right hemispheres." },
-  { id: "optic", name: "Optic Radiation", from: "occipital", to: "parietal", color: "#c49a3c", desc: "Visual information to integration areas." },
-  { id: "corticospinal", name: "Corticospinal Tract", from: "frontal", to: "brainstem", color: "#e85d4c", desc: "Motor commands to the spinal cord." },
-  { id: "cerebello", name: "Cerebello-thalamic", from: "cerebellum", to: "frontal", color: "#5a9a6e", desc: "Fine-tunes motor output." },
-  { id: "limbic", name: "Limbic Pathway", from: "temporal", to: "frontal", color: "#8b5a7a", desc: "Emotional memory to executive areas." },
+  { id: "arcuate", name: "Arcuate Fasciculus", from: "frontal", to: "temporal", color: "#7c5cff", desc: "Links Broca's and Wernicke's areas for speech." },
+  { id: "corpus", name: "Corpus Callosum", from: "frontal", to: "parietal", color: "#22d3ee", desc: "Bridge between left and right hemispheres." },
+  { id: "optic", name: "Optic Radiation", from: "occipital", to: "parietal", color: "#fbbf24", desc: "Visual information to integration areas." },
+  { id: "corticospinal", name: "Corticospinal Tract", from: "frontal", to: "brainstem", color: "#f472b6", desc: "Motor commands to the spinal cord." },
+  { id: "cerebello", name: "Cerebello-thalamic", from: "cerebellum", to: "frontal", color: "#34d399", desc: "Fine-tunes motor output." },
+  { id: "limbic", name: "Limbic Pathway", from: "temporal", to: "frontal", color: "#fb923c", desc: "Emotional memory to executive areas." },
 ];
 
 const NEUROTRANSMITTERS = [
-  { name: "Glutamate", color: "#3a8fb7", effect: "Primary excitatory signal" },
-  { name: "GABA", color: "#0d6e6e", effect: "Primary inhibitory brake" },
-  { name: "Dopamine", color: "#c49a3c", effect: "Reward, motivation, movement" },
-  { name: "Serotonin", color: "#5a9a6e", effect: "Mood, sleep, appetite" },
-  { name: "Acetylcholine", color: "#e85d4c", effect: "Attention & learning" },
-  { name: "Norepinephrine", color: "#8b5a7a", effect: "Alertness & stress response" },
+  { name: "Glutamate", color: "#22d3ee", effect: "Primary excitatory signal" },
+  { name: "GABA", color: "#7c5cff", effect: "Primary inhibitory brake" },
+  { name: "Dopamine", color: "#fbbf24", effect: "Reward, motivation, movement" },
+  { name: "Serotonin", color: "#34d399", effect: "Mood, sleep, appetite" },
+  { name: "Acetylcholine", color: "#f472b6", effect: "Attention & learning" },
+  { name: "Norepinephrine", color: "#fb923c", effect: "Alertness & stress response" },
 ];
 
 const HERO_METRICS = [
@@ -192,7 +204,78 @@ function initNav() {
   $$(".region-card").forEach((b) => b.addEventListener("click", () => selectRegion(b.dataset.region)));
 }
 
+function initAmbient() {
+  const canvas = $("#ambientCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const nodes = Array.from({ length: 55 }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    vx: (Math.random() - 0.5) * 0.00025,
+    vy: (Math.random() - 0.5) * 0.00025,
+    r: Math.random() * 2 + 0.5,
+  }));
+
+  function resize() {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+  }
+  resize();
+  addEventListener("resize", resize);
+
+  (function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    nodes.forEach((n) => {
+      n.x += n.vx;
+      n.y += n.vy;
+      if (n.x < 0 || n.x > 1) n.vx *= -1;
+      if (n.y < 0 || n.y > 1) n.vy *= -1;
+    });
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = (nodes[i].x - nodes[j].x) * canvas.width;
+        const dy = (nodes[i].y - nodes[j].y) * canvas.height;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 140) {
+          const alpha = 0.14 * (1 - dist / 140);
+          ctx.strokeStyle = `rgba(167, 139, 250, ${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x * canvas.width, nodes[i].y * canvas.height);
+          ctx.lineTo(nodes[j].x * canvas.width, nodes[j].y * canvas.height);
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach((n) => {
+      ctx.beginPath();
+      ctx.arc(n.x * canvas.width, n.y * canvas.height, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(34, 211, 238, 0.45)";
+      ctx.fill();
+    });
+    requestAnimationFrame(loop);
+  })();
+}
+
 function initHexMap() {
+  const gradDefs = $("#hexGradDefs");
+  Object.entries(REGIONS).forEach(([key, r]) => {
+    const grad = document.createElementNS("http://www.w3.org/2000/svg", "radialGradient");
+    grad.setAttribute("id", `grad-${key}`);
+    grad.setAttribute("cx", "35%");
+    grad.setAttribute("cy", "30%");
+    grad.setAttribute("r", "70%");
+    const s1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    s1.setAttribute("offset", "0%");
+    s1.setAttribute("stop-color", r.colorLight || r.color);
+    const s2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    s2.setAttribute("offset", "100%");
+    s2.setAttribute("stop-color", r.color);
+    grad.appendChild(s1);
+    grad.appendChild(s2);
+    gradDefs.appendChild(grad);
+  });
+
   const hexG = $("#hexRegions");
   const labelsG = $("#regionLabels");
 
@@ -204,34 +287,40 @@ function initHexMap() {
     g.setAttribute("role", "button");
     g.setAttribute("aria-label", r.name);
 
+    const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    ring.setAttribute("class", "hex-ring");
+    ring.setAttribute("cx", r.center.x);
+    ring.setAttribute("cy", r.center.y);
+    ring.setAttribute("r", HEX_R + 8);
+    ring.setAttribute("stroke", r.color);
+    g.appendChild(ring);
+
     const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     poly.setAttribute("points", hexPoints(r.center.x, r.center.y, HEX_R));
-    poly.setAttribute("fill", r.color);
-    poly.setAttribute("fill-opacity", "0.88");
+    poly.setAttribute("fill", `url(#grad-${key})`);
     g.appendChild(poly);
+
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    icon.setAttribute("class", "region-tag");
+    icon.setAttribute("x", r.center.x);
+    icon.setAttribute("y", r.center.y - 10);
+    icon.setAttribute("text-anchor", "middle");
+    icon.setAttribute("font-size", "18");
+    icon.setAttribute("opacity", "0.9");
+    icon.textContent = r.icon;
 
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
     text.setAttribute("class", "region-tag");
-    text.setAttribute("data-for", key);
     text.setAttribute("x", r.center.x);
-    text.setAttribute("y", r.center.y - 6);
+    text.setAttribute("y", r.center.y + 8);
     text.setAttribute("text-anchor", "middle");
-    text.setAttribute("font-size", "11");
+    text.setAttribute("font-size", "10");
+    text.setAttribute("font-weight", "700");
     text.textContent = r.name.split(" ")[0];
 
-    const sub = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    sub.setAttribute("class", "region-tag");
-    sub.setAttribute("data-for", key);
-    sub.setAttribute("x", r.center.x);
-    sub.setAttribute("y", r.center.y + 10);
-    sub.setAttribute("text-anchor", "middle");
-    sub.setAttribute("font-size", "9");
-    sub.setAttribute("fill", "#fff");
-    sub.textContent = "Lobe";
-
     hexG.appendChild(g);
+    labelsG.appendChild(icon);
     labelsG.appendChild(text);
-    labelsG.appendChild(sub);
   });
 
   const linesG = $("#pathwayLines");
@@ -390,9 +479,17 @@ function propagateSignal(fromKey, toKey) {
   const pulseG = $("#signalPulse");
   pulseG.innerHTML = "";
   const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  dot.setAttribute("r", "9");
+  dot.setAttribute("r", "10");
   dot.setAttribute("class", "signal-dot");
   pulseG.appendChild(dot);
+
+  const trail = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  trail.setAttribute("r", "18");
+  trail.setAttribute("fill", "none");
+  trail.setAttribute("stroke", "#22d3ee");
+  trail.setAttribute("stroke-width", "2");
+  trail.setAttribute("opacity", "0.35");
+  pulseG.appendChild(trail);
 
   let t = 0;
   const segs = $$(".track-seg");
@@ -402,6 +499,8 @@ function propagateSignal(fromKey, toKey) {
     if (t > 1) t = 1;
     dot.setAttribute("cx", from.x + (to.x - from.x) * t);
     dot.setAttribute("cy", from.y + (to.y - from.y) * t);
+    trail.setAttribute("cx", dot.getAttribute("cx"));
+    trail.setAttribute("cy", dot.getAttribute("cy"));
     segs.forEach((s, i) => s.classList.toggle("is-lit", i / segs.length <= t));
     if (t < 1) requestAnimationFrame(animate);
     else {
@@ -428,17 +527,28 @@ function drawActivityChart() {
   const maxH = 160;
 
   keys.forEach((k, i) => {
-    const base = k === "cerebellum" ? 0.92 : k === activeRegion ? 0.82 : 0.3 + (i * 0.08);
+    const base = k === "cerebellum" ? 0.92 : k === activeRegion ? 0.85 : 0.28 + (i * 0.07);
     const h = base * maxH;
     const x = 30 + i * (barW + 10);
-    ctx.fillStyle = REGIONS[k].color;
-    ctx.globalAlpha = k === activeRegion ? 1 : 0.5;
-    ctx.fillRect(x, 200 - h, barW, h);
+    const grad = ctx.createLinearGradient(x, 200 - h, x, 200);
+    grad.addColorStop(0, REGIONS[k].colorLight || REGIONS[k].color);
+    grad.addColorStop(1, REGIONS[k].color);
+    ctx.fillStyle = grad;
+    ctx.globalAlpha = k === activeRegion ? 1 : 0.45;
+    ctx.beginPath();
+    ctx.roundRect(x, 200 - h, barW, h, 4);
+    ctx.fill();
+    if (k === activeRegion) {
+      ctx.shadowColor = REGIONS[k].color;
+      ctx.shadowBlur = 12;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
     ctx.globalAlpha = 1;
-    ctx.fillStyle = "#7a7a92";
-    ctx.font = "10px IBM Plex Sans";
+    ctx.fillStyle = "#7a7594";
+    ctx.font = "10px Outfit, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(REGIONS[k].name.split(" ")[0], x + barW / 2, 220);
+    ctx.fillText(REGIONS[k].name.split(" ")[0], x + barW / 2, 222);
   });
 }
 
@@ -458,6 +568,7 @@ function drawNetworkGraph() {
       y: r.center.y * (520 / 720),
       vx: 0, vy: 0,
       color: r.color,
+      colorLight: r.colorLight,
       label: r.name.split(" ")[0],
     }));
   }
@@ -469,7 +580,11 @@ function drawNetworkGraph() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.scale(dpr, dpr);
-    ctx.fillStyle = "#faf8f5";
+
+    const bgGrad = ctx.createRadialGradient(w / 2, 260, 0, w / 2, 260, w * 0.6);
+    bgGrad.addColorStop(0, "#1a1535");
+    bgGrad.addColorStop(1, "#0a0818");
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, 520);
 
     PATHWAYS.forEach((p) => {
@@ -477,13 +592,15 @@ function drawNetworkGraph() {
       const b = networkNodes.find((n) => n.key === p.to);
       if (!a || !b) return;
       const on = activeRegion === p.from || activeRegion === p.to || activePathway === p.id;
-      ctx.strokeStyle = on ? p.color : "#ddd6cc";
+      ctx.strokeStyle = on ? p.color : "rgba(255,255,255,0.08)";
       ctx.lineWidth = on ? 2.5 : 1;
-      ctx.globalAlpha = on ? 0.9 : 0.4;
+      ctx.globalAlpha = on ? 0.85 : 0.35;
+      if (on) { ctx.shadowColor = p.color; ctx.shadowBlur = 8; }
       ctx.beginPath();
       ctx.moveTo(a.x, a.y);
       ctx.lineTo(b.x, b.y);
       ctx.stroke();
+      ctx.shadowBlur = 0;
       ctx.globalAlpha = 1;
     });
 
@@ -500,18 +617,18 @@ function drawNetworkGraph() {
       n.x = Math.max(40, Math.min(w - 40, n.x + n.vx));
       n.y = Math.max(40, Math.min(480, n.y + n.vy));
 
-      const r = n.key === activeRegion ? 28 : 22;
-      ctx.fillStyle = n.color;
+      const r = n.key === activeRegion ? 30 : 24;
+      const grad = ctx.createRadialGradient(n.x - 4, n.y - 4, 0, n.x, n.y, r);
+      grad.addColorStop(0, n.colorLight || n.color);
+      grad.addColorStop(1, n.color);
+      ctx.fillStyle = grad;
+      if (n.key === activeRegion) { ctx.shadowColor = n.color; ctx.shadowBlur = 16; }
       ctx.beginPath();
       ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
       ctx.fill();
-      if (n.key === activeRegion) {
-        ctx.strokeStyle = "#1a1a2e";
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-      }
-      ctx.fillStyle = n.key === activeRegion ? "#fff" : "#1a1a2e";
-      ctx.font = `bold ${n.key === activeRegion ? 12 : 10}px IBM Plex Sans`;
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#fff";
+      ctx.font = `bold ${n.key === activeRegion ? 12 : 10}px Outfit, sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(n.label, n.x, n.y);
@@ -532,28 +649,31 @@ function startActionPotential() {
 
   (function draw() {
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = "#f7f3ee";
+    ctx.fillStyle = "#12101f";
     ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = "#ddd6cc";
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
     ctx.beginPath();
-    ctx.moveTo(20, h / 2);
-    ctx.lineTo(w - 20, h / 2);
+    ctx.moveTo(16, h / 2);
+    ctx.lineTo(w - 16, h / 2);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.strokeStyle = "#0d6e6e";
-    ctx.lineWidth = 2;
-    for (let x = 0; x <= w - 40; x++) {
-      const phase = (x / (w - 40) + t) % 1;
+    ctx.strokeStyle = "#22d3ee";
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = "#22d3ee";
+    ctx.shadowBlur = 10;
+    for (let x = 0; x <= w - 32; x++) {
+      const phase = (x / (w - 32) + t) % 1;
       let mv = -70;
       if (phase > 0.15 && phase < 0.22) mv = -70 + ((phase - 0.15) / 0.07) * 110;
       else if (phase >= 0.22 && phase < 0.32) mv = 40 - ((phase - 0.22) / 0.1) * 100;
       else if (phase >= 0.32 && phase < 0.42) mv = -60 + ((phase - 0.32) / 0.1) * 25;
       const y = h / 2 - (mv + 70) * 1.1;
-      if (x === 0) ctx.moveTo(20 + x, y);
-      else ctx.lineTo(20 + x, y);
+      if (x === 0) ctx.moveTo(16 + x, y);
+      else ctx.lineTo(16 + x, y);
     }
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
     const phaseNow = t % 1;
     let mvNow = -70;
@@ -621,6 +741,7 @@ function bindEvents() {
 }
 
 function init() {
+  initAmbient();
   initHero();
   initNav();
   initHexMap();
